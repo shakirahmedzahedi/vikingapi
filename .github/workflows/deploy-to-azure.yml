@@ -39,13 +39,11 @@ jobs:
         username: ${{ secrets.AZURE_VM_USERNAME }}
         key: ${{ secrets.AZURE_VM_SSH_KEY }}
         script: |
-            # Pull the latest Docker image from ACR
-            docker login ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }} --username ${{ secrets.ACR_USERNAME }} --password ${{ secrets.ACR_PASSWORD }}
-            docker pull ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/api:${{ github.sha }}
+          echo ${{ secrets.AZURE_REGISTRY_PASSWORD }} | docker login ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }} \
+          -u ${{ secrets.AZURE_REGISTRY_USERNAME }} --password-stdin
+          docker pull ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/api:${{ github.sha }}
             
-            # Stop and remove any existing container (optional)
-            docker stop goat || true
-            docker rm goat || true
+          docker stop goat || true
+          docker rm goat || true
             
-            # Run the new container
-            docker run -d --name goat -p 80:8080 ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/api:${{ github.sha }}
+          docker run -d --name goat -p 80:8080 ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/api:${{ github.sha }}
